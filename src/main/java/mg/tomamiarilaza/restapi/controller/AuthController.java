@@ -20,9 +20,6 @@ public class AuthController {
     @Autowired
     AuthService authService;
 
-    private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
-
-
     @PostMapping("/login")
     public Map login(@RequestBody LoginDTO dto) {
         String token = authService.login(dto.getEmail(), dto.getPassword());
