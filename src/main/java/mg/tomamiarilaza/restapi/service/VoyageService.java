@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,10 +77,9 @@ public class VoyageService {
                 predicates.add(cb.equal(root.get("destination").get("id"), idDestination));
             }
             if (depart != null) {
-                predicates.add(cb.equal(
-                        root.get("depart").as(java.sql.Date.class),
-                        java.sql.Date.valueOf(depart)
-                ));
+                LocalDateTime debut = depart.atStartOfDay();
+                LocalDateTime fin = depart.plusDays(1).atStartOfDay();
+                predicates.add(cb.between(root.get("depart"), debut, fin));
             }
             if (etat != null) {
                 predicates.add(cb.equal(root.get("etat"), etat));
