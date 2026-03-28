@@ -1,3 +1,7 @@
+-- Insert Users
+INSERT INTO users (email, password, role) VALUES ('admin@trip.com', 'admin123', 'ADMIN');
+INSERT INTO users (email, password, role) VALUES ('customer@trip.com', 'customer123', 'CUSTOMER');
+
 -- Insert Lieu (3 cities)
 INSERT INTO lieu (nom) VALUES ('Antananarivo');
 INSERT INTO lieu (nom) VALUES ('Antsirabe');

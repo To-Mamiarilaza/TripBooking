@@ -1,0 +1,13 @@
+﻿Name,Endpoint,Responsable,Role,Status
+Création d’un voyage,POST /voyages,Isabelle,ADMIN,Not started
+Modification d’un voyage,PUT /voyages/{idVoyage},Isabelle,ADMIN,Not started
+Consulter tous les voyages avec filtres,GET /voyages,Isabelle,PUBLIC,Not started
+Consulter un voyage avec ses détails ( état place ),GET /voyages/{idVoyage},To,"ADMIN, CUSTOMER",Not started
+Annuler un voyage,DELETE /voyages/{idVoyage},Isabelle,ADMIN,Not started
+Réservation d’un voyage,POST /reservations,To,"ADMIN, CUSTOMER",Not started
+Modification d’un réservation,PUT /reservations/{idReservation},To,"ADMIN, CUSTOMER",Not started
+Annuler réservation,PUT /cancel-reservation/{idReservation},To,"ADMIN, CUSTOMER",Not started
+Confirmer réservation,PUT /confirm-reservation/{idReservation},To,"ADMIN, CUSTOMER",Not started
+Statistiques mensuels,GET /voyages/statistiques/{année}/{mois},To,ADMIN,Not started
+Authentification et gestion des roles,,Isabelle,,Not started
+Déployer le webservice en ligne,,To,,Not started
