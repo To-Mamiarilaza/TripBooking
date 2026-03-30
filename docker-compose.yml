@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  restapi:
+    build: .
+    container_name: restapi_container
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - restapi-network
+
+networks:
+  restapi-network:
+    driver: bridge
