@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import mg.tomamiarilaza.restapi.service.StatisticService;
 import mg.tomamiarilaza.restapi.service.TokenService;
 import mg.tomamiarilaza.restapi.model.RevenueByMonth;
+import mg.tomamiarilaza.restapi.model.RevenueByRoute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -53,6 +54,30 @@ public class StatisticController {
         List<RevenueByMonth> revenues = statisticService.getRevenueByMonth(year);
         
         CollectionModel<RevenueByMonth> model = CollectionModel.of(revenues,
+                linkTo(methodOn(VoyageController.class).getAll(null, null, null, null, null)).withRel("voyages")
+        );
+        
+        return ResponseEntity.ok(model);
+    }
+
+    // --- GET /api/statistics/trajets/{year}/{month} ---
+    @GetMapping("/trajets/{year}/{month}")
+    public ResponseEntity<CollectionModel<RevenueByRoute>> getRevenueByRoute(
+            @PathVariable Integer year,
+            @PathVariable Integer month,
+            HttpServletRequest request) {
+        
+        // Require ADMIN role
+        requireRole(request, "ADMIN");
+        
+        // Validate month
+        if (month < 1 || month > 12) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le mois doit être entre 1 et 12");
+        }
+        
+        List<RevenueByRoute> routes = statisticService.getRevenueByRoute(year, month);
+        
+        CollectionModel<RevenueByRoute> model = CollectionModel.of(routes,
                 linkTo(methodOn(VoyageController.class).getAll(null, null, null, null, null)).withRel("voyages")
         );
         

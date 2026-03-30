@@ -1,7 +1,9 @@
 package mg.tomamiarilaza.restapi.service;
 
 import mg.tomamiarilaza.restapi.model.RevenueByMonth;
+import mg.tomamiarilaza.restapi.model.RevenueByRoute;
 import mg.tomamiarilaza.restapi.repository.RevenueByMonthRepository;
+import mg.tomamiarilaza.restapi.repository.RevenueByRouteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,9 @@ public class StatisticService {
 
     @Autowired
     private RevenueByMonthRepository revenueByMonthRepository;
+
+    @Autowired
+    private RevenueByRouteRepository revenueByRouteRepository;
 
     public List<RevenueByMonth> getRevenueByMonth(Integer year) {
         List<RevenueByMonth> revenues = revenueByMonthRepository.findByYear(year);
@@ -41,5 +46,9 @@ public class StatisticService {
         }
         
         return result;
+    }
+
+    public List<RevenueByRoute> getRevenueByRoute(Integer year, Integer month) {
+        return revenueByRouteRepository.findByYearAndMonth(year, month);
     }
 }
