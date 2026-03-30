@@ -2,6 +2,7 @@ package mg.tomamiarilaza.restapi.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import mg.tomamiarilaza.restapi.dto.VoyageDTO;
+import mg.tomamiarilaza.restapi.dto.VoyageWithDetailsDTO;
 import mg.tomamiarilaza.restapi.model.Voyage;
 import mg.tomamiarilaza.restapi.service.TokenService;
 import mg.tomamiarilaza.restapi.service.VoyageService;
@@ -113,5 +114,17 @@ public class VoyageController {
         CollectionModel<EntityModel<Voyage>> collection = CollectionModel.of(models, selfLink);
 
         return ResponseEntity.ok(collection);
+    }
+
+    /**
+     * GET /api/voyages/{idVoyage}/details
+     * Get voyage with all seat states from view and reservations
+     * Avoids recursive fetching using DTOs
+     */
+    @GetMapping("/{idVoyage}/details")
+    public ResponseEntity<?> getVoyageDetails(@PathVariable Integer idVoyage) {
+        VoyageWithDetailsDTO voyage = voyageService.getVoyageWithDetails(idVoyage);
+
+        return ResponseEntity.ok(voyage);
     }
 }

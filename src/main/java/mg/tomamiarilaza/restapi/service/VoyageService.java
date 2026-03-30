@@ -2,11 +2,11 @@ package mg.tomamiarilaza.restapi.service;
 
 import jakarta.persistence.criteria.Predicate;
 import mg.tomamiarilaza.restapi.dto.VoyageDTO;
+import mg.tomamiarilaza.restapi.dto.VoyageWithDetailsDTO;
 import mg.tomamiarilaza.restapi.model.Voyage;
-import mg.tomamiarilaza.restapi.repository.ChauffeurRepository;
-import mg.tomamiarilaza.restapi.repository.LieuRepository;
-import mg.tomamiarilaza.restapi.repository.VoitureRepository;
-import mg.tomamiarilaza.restapi.repository.VoyageRepository;
+import mg.tomamiarilaza.restapi.model.VoyageSeatState;
+import mg.tomamiarilaza.restapi.model.Reservation;
+import mg.tomamiarilaza.restapi.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class VoyageService {
@@ -24,6 +25,8 @@ public class VoyageService {
     @Autowired LieuRepository lieuRepository;
     @Autowired VoitureRepository voitureRepository;
     @Autowired ChauffeurRepository chauffeurRepository;
+    @Autowired VoyageSeatStateRepository voyageSeatStateRepository;
+    @Autowired ReservationRepository reservationRepository;
 
     public Voyage create(VoyageDTO dto) {
         Voyage voyage = new Voyage();
@@ -89,5 +92,73 @@ public class VoyageService {
         };
 
         return voyageRepository.findAll(spec);
+    }
+
+    /**
+     * Get voyage with all details: seats from view and reservations
+     * Avoids recursive fetching by using DTOs
+     */
+    public VoyageWithDetailsDTO getVoyageWithDetails(Integer voyageId) {
+        Voyage voyage = voyageRepository.findById(voyageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voyage introuvable"));
+
+        // Get all seats for this voyage from the view
+        List<VoyageSeatState> seatStates = voyageSeatStateRepository.findByVoyageId(voyageId);
+
+        // Get all reservations for this voyage
+        List<Reservation> reservations = reservationRepository.findByVoyageId(voyageId);
+
+        // Build the response DTO
+        VoyageWithDetailsDTO dto = new VoyageWithDetailsDTO();
+        dto.setId(voyage.getId());
+        dto.setIdOrigine(voyage.getOrigine().getId());
+        dto.setIdDestination(voyage.getDestination().getId());
+        dto.setOriginName(voyage.getOrigine().getNom());
+        dto.setDestinationName(voyage.getDestination().getNom());
+        dto.setPrix(voyage.getPrix());
+        dto.setDepart(voyage.getDepart());
+        dto.setIdVoiture(voyage.getVoiture().getId());
+        dto.setVoitureNumero(voyage.getVoiture().getNumero());
+        dto.setVoitureMarque(voyage.getVoiture().getMarque());
+        dto.setIdChauffeur(voyage.getChauffeur().getId());
+        dto.setChauffeurNom(voyage.getChauffeur().getNom());
+        dto.setEtat(voyage.getEtat());
+
+        // Map seat states
+        List<VoyageWithDetailsDTO.VoyageSeatStateDTO> seatDTOs = seatStates.stream()
+                .map(seat -> {
+                    VoyageWithDetailsDTO.VoyageSeatStateDTO seatDTO = new VoyageWithDetailsDTO.VoyageSeatStateDTO();
+                    seatDTO.setSeatId(seat.getSeatId());
+                    seatDTO.setSeatNumber(seat.getSeatNumber());
+                    seatDTO.setSeatStatus(seat.getSeatStatus());
+                    seatDTO.setSeatState(seat.getSeatState());
+                    seatDTO.setPassengerName(seat.getPassengerName());
+                    seatDTO.setPassengerPhone(seat.getPassengerPhone());
+                    seatDTO.setReservationState(seat.getReservationState());
+                    return seatDTO;
+                })
+                .collect(Collectors.toList());
+        dto.setSeats(seatDTOs);
+
+        // Map reservations without loading the full entity relationships
+        List<VoyageWithDetailsDTO.ReservationSummaryDTO> reservationDTOs = reservations.stream()
+                .map(res -> {
+                    VoyageWithDetailsDTO.ReservationSummaryDTO resDTO = new VoyageWithDetailsDTO.ReservationSummaryDTO();
+                    resDTO.setId(res.getId());
+                    resDTO.setNomVoyageur(res.getNomVoyageur());
+                    resDTO.setTelephone(res.getTelephone());
+                    resDTO.setEtat(res.getEtat());
+                    // Get seat numbers for this reservation
+                    if (res.getReservationPlaces() != null) {
+                        resDTO.setSeatNumbers(res.getReservationPlaces().stream()
+                                .map(rp -> rp.getPlace().getNumero())
+                                .collect(Collectors.toList()));
+                    }
+                    return resDTO;
+                })
+                .collect(Collectors.toList());
+        dto.setReservations(reservationDTOs);
+
+        return dto;
     }
 }

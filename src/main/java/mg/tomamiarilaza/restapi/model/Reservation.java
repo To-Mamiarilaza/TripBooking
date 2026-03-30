@@ -1,9 +1,12 @@
 package mg.tomamiarilaza.restapi.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Table(name = "reservation")
@@ -27,4 +30,8 @@ public class Reservation {
 
     @Column(nullable = false)
     private Integer etat;
+
+    @OneToMany(mappedBy = "reservation", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private List<ReservationPlace> reservationPlaces;
 }

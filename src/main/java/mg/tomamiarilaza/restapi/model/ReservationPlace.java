@@ -1,5 +1,6 @@
 package mg.tomamiarilaza.restapi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class ReservationPlace {
 
     @ManyToOne
     @JoinColumn(name = "id_reservation", nullable = false)
+    @JsonBackReference
     private Reservation reservation;
 
     @ManyToOne
