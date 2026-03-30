@@ -41,16 +41,34 @@ public class TokenService {
         }
     }
 
+    public Claims extractAllClaims(String token) {
+        return Jwts
+            .parserBuilder()
+            .setSigningKey(getKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+    }
+
     public boolean hasRole(String token, String role) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(getKey())
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+            Claims claims = extractAllClaims(token);
             return role.equals(claims.get("role", String.class));
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public String getRole(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            return claims.get("role", String.class);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public String getEmail(String token) {
+        return extractAllClaims(token).getSubject();
     }
 }

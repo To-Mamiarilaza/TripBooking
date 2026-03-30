@@ -12,6 +12,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,26 +32,10 @@ public class VoyageController {
     @Autowired
     TokenService tokenService;
 
-    // --- Validation token/role ---
-    private void requireRole(HttpServletRequest request, String role) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token requis");
-        }
-        String token = authHeader.substring(7);
-        if (!tokenService.isValid(token)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token invalide");
-        }
-        if (!tokenService.hasRole(token, role)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès refusé : rôle " + role + " requis");
-        }
-    }
-
     // --- POST /api/voyages ---
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EntityModel<Voyage>> create(@RequestBody VoyageDTO dto, HttpServletRequest request) {
-        requireRole(request, "ADMIN");
-
         Voyage voyage = voyageService.create(dto);
 
         EntityModel<Voyage> model = EntityModel.of(voyage,
@@ -63,11 +48,10 @@ public class VoyageController {
 
     // --- PUT /api/voyages/{idVoyage} ---
     @PutMapping("/{idVoyage}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EntityModel<Voyage>> update(@PathVariable Integer idVoyage,
                                                        @RequestBody VoyageDTO dto,
                                                        HttpServletRequest request) {
-        requireRole(request, "ADMIN");
-
         Voyage voyage = voyageService.update(idVoyage, dto);
 
         EntityModel<Voyage> model = EntityModel.of(voyage,
@@ -81,9 +65,8 @@ public class VoyageController {
 
     // --- DELETE /api/voyages/{idVoyage} ---
     @DeleteMapping("/{idVoyage}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> cancel(@PathVariable Integer idVoyage, HttpServletRequest request) {
-        requireRole(request, "ADMIN");
-
         voyageService.cancel(idVoyage);
 
         return ResponseEntity.ok(java.util.Map.of(

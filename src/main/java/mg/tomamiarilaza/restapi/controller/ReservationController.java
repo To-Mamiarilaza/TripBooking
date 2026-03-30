@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,23 +25,6 @@ public class ReservationController {
 
     @Autowired
     private TokenService tokenService;
-
-    /**
-     * Validate token and role
-     */
-    private void requireRole(HttpServletRequest request, String role) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token requis");
-        }
-        String token = authHeader.substring(7);
-        if (!tokenService.isValid(token)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token invalide");
-        }
-        if (!tokenService.hasRole(token, role)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès refusé : rôle " + role + " requis");
-        }
-    }
 
     /**
      * POST /api/reservations
@@ -59,12 +43,10 @@ public class ReservationController {
      * }
      */
     @PostMapping
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<EntityModel<Reservation>> createReservation(
             @RequestBody ReservationDTO dto,
             HttpServletRequest request) {
-
-        // Validate token (CUSTOMER or ADMIN can create reservations)
-        requireRole(request, "CUSTOMER");
 
         try {
             Reservation reservation = reservationService.createReservation(dto);
@@ -84,9 +66,8 @@ public class ReservationController {
      * Get reservation with all its seats
      */
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<EntityModel<Reservation>> getReservation(@PathVariable Integer id, HttpServletRequest request) {
-        requireRole(request, "CUSTOMER");
-
         try {
             Reservation reservation = reservationService.getReservationWithSeats(id);
 
@@ -117,13 +98,11 @@ public class ReservationController {
      * }
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<EntityModel<Reservation>> updateReservation(
             @PathVariable Integer id,
             @RequestBody ReservationDTO dto,
             HttpServletRequest request) {
-
-        requireRole(request, "CUSTOMER");
-
         try {
             Reservation reservation = reservationService.updateReservation(id, dto);
 
@@ -144,12 +123,10 @@ public class ReservationController {
      * Sets reservation state to CONFIRMED (etat = 2)
      */
     @PostMapping("/{id}/confirm")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<EntityModel<Reservation>> confirmReservation(
             @PathVariable Integer id,
             HttpServletRequest request) {
-
-        requireRole(request, "CUSTOMER");
-
         try {
             Reservation reservation = reservationService.confirmReservation(id);
 
@@ -170,12 +147,10 @@ public class ReservationController {
      * Sets reservation state to CANCELLED (etat = 0)
      */
     @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<EntityModel<Reservation>> cancelReservation(
             @PathVariable Integer id,
             HttpServletRequest request) {
-
-        requireRole(request, "CUSTOMER");
-
         try {
             Reservation reservation = reservationService.cancelReservation(id);
 

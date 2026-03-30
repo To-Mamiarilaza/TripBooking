@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,29 +28,12 @@ public class StatisticController {
     @Autowired
     private TokenService tokenService;
 
-    // --- Validation token/role ---
-    private void requireRole(HttpServletRequest request, String role) {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token requis");
-        }
-        String token = authHeader.substring(7);
-        if (!tokenService.isValid(token)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token invalide");
-        }
-        if (!tokenService.hasRole(token, role)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Accès refusé : rôle " + role + " requis");
-        }
-    }
-
     // --- GET /api/statistics/revenus/{year} ---
     @GetMapping("/revenus/{year}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CollectionModel<RevenueByMonth>> getRevenueByMonth(
             @PathVariable Integer year,
             HttpServletRequest request) {
-        
-        // Require ADMIN role
-        requireRole(request, "ADMIN");
         
         List<RevenueByMonth> revenues = statisticService.getRevenueByMonth(year);
         
@@ -62,13 +46,11 @@ public class StatisticController {
 
     // --- GET /api/statistics/trajets/{year}/{month} ---
     @GetMapping("/trajets/{year}/{month}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CollectionModel<RevenueByRoute>> getRevenueByRoute(
             @PathVariable Integer year,
             @PathVariable Integer month,
             HttpServletRequest request) {
-        
-        // Require ADMIN role
-        requireRole(request, "ADMIN");
         
         // Validate month
         if (month < 1 || month > 12) {
