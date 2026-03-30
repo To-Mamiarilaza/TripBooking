@@ -51,8 +51,13 @@ public class ReservationController {
         try {
             Reservation reservation = reservationService.createReservation(dto);
 
-            EntityModel<Reservation> model = EntityModel.of(reservation);
-            model.add(linkTo(methodOn(ReservationController.class).createReservation(dto, request)).withSelfRel());
+            EntityModel<Reservation> model = EntityModel.of(reservation,
+                    linkTo(methodOn(ReservationController.class).createReservation(dto, request)).withSelfRel(),
+                    linkTo(methodOn(ReservationController.class).getReservation(reservation.getId(), request)).withRel("consulter"),
+                    linkTo(methodOn(ReservationController.class).updateReservation(reservation.getId(), dto, request)).withRel("modifier"),
+                    linkTo(methodOn(ReservationController.class).confirmReservation(reservation.getId(), request)).withRel("confirmer"),
+                    linkTo(methodOn(ReservationController.class).cancelReservation(reservation.getId(), request)).withRel("annuler")
+            );
 
             return ResponseEntity.status(HttpStatus.CREATED).body(model);
 
@@ -71,8 +76,12 @@ public class ReservationController {
         try {
             Reservation reservation = reservationService.getReservationWithSeats(id);
 
-            EntityModel<Reservation> model = EntityModel.of(reservation);
-            model.add(linkTo(methodOn(ReservationController.class).getReservation(id, request)).withSelfRel());
+            EntityModel<Reservation> model = EntityModel.of(reservation,
+                    linkTo(methodOn(ReservationController.class).getReservation(id, request)).withSelfRel(),
+                    linkTo(methodOn(ReservationController.class).updateReservation(id, null, request)).withRel("modifier"),
+                    linkTo(methodOn(ReservationController.class).confirmReservation(id, request)).withRel("confirmer"),
+                    linkTo(methodOn(ReservationController.class).cancelReservation(id, request)).withRel("annuler")
+            );
 
             return ResponseEntity.ok(model);
 
@@ -106,8 +115,12 @@ public class ReservationController {
         try {
             Reservation reservation = reservationService.updateReservation(id, dto);
 
-            EntityModel<Reservation> model = EntityModel.of(reservation);
-            model.add(linkTo(methodOn(ReservationController.class).updateReservation(id, dto, request)).withSelfRel());
+            EntityModel<Reservation> model = EntityModel.of(reservation,
+                    linkTo(methodOn(ReservationController.class).updateReservation(id, dto, request)).withSelfRel(),
+                    linkTo(methodOn(ReservationController.class).getReservation(id, request)).withRel("consulter"),
+                    linkTo(methodOn(ReservationController.class).confirmReservation(id, request)).withRel("confirmer"),
+                    linkTo(methodOn(ReservationController.class).cancelReservation(id, request)).withRel("annuler")
+            );
 
             return ResponseEntity.ok(model);
 
@@ -130,8 +143,12 @@ public class ReservationController {
         try {
             Reservation reservation = reservationService.confirmReservation(id);
 
-            EntityModel<Reservation> model = EntityModel.of(reservation);
-            model.add(linkTo(methodOn(ReservationController.class).confirmReservation(id, request)).withSelfRel());
+            EntityModel<Reservation> model = EntityModel.of(reservation,
+                    linkTo(methodOn(ReservationController.class).confirmReservation(id, request)).withSelfRel(),
+                    linkTo(methodOn(ReservationController.class).getReservation(id, request)).withRel("consulter"),
+                    linkTo(methodOn(ReservationController.class).updateReservation(id, null, request)).withRel("modifier"),
+                    linkTo(methodOn(ReservationController.class).cancelReservation(id, request)).withRel("annuler")
+            );
 
             return ResponseEntity.ok(model);
 
@@ -154,8 +171,12 @@ public class ReservationController {
         try {
             Reservation reservation = reservationService.cancelReservation(id);
 
-            EntityModel<Reservation> model = EntityModel.of(reservation);
-            model.add(linkTo(methodOn(ReservationController.class).cancelReservation(id, request)).withSelfRel());
+            EntityModel<Reservation> model = EntityModel.of(reservation,
+                    linkTo(methodOn(ReservationController.class).cancelReservation(id, request)).withSelfRel(),
+                    linkTo(methodOn(ReservationController.class).getReservation(id, request)).withRel("consulter"),
+                    linkTo(methodOn(ReservationController.class).updateReservation(id, null, request)).withRel("modifier"),
+                    linkTo(methodOn(ReservationController.class).confirmReservation(id, request)).withRel("confirmer")
+            );
 
             return ResponseEntity.ok(model);
 

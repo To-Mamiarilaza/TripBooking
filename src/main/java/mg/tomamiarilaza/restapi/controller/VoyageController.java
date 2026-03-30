@@ -40,6 +40,7 @@ public class VoyageController {
 
         EntityModel<Voyage> model = EntityModel.of(voyage,
                 linkTo(methodOn(VoyageController.class).getAll(null, null, null, null, null)).withRel("voyages"),
+                linkTo(methodOn(VoyageController.class).getVoyageDetails(voyage.getId())).withRel("details"),
                 linkTo(methodOn(VoyageController.class).create(dto, null)).withSelfRel()
         );
 
@@ -57,6 +58,7 @@ public class VoyageController {
         EntityModel<Voyage> model = EntityModel.of(voyage,
                 linkTo(methodOn(VoyageController.class).update(idVoyage, dto, null)).withSelfRel(),
                 linkTo(methodOn(VoyageController.class).getAll(null, null, null, null, null)).withRel("voyages"),
+                linkTo(methodOn(VoyageController.class).getVoyageDetails(idVoyage)).withRel("details"),
                 linkTo(methodOn(VoyageController.class).cancel(idVoyage, null)).withRel("annuler")
         );
 
@@ -89,6 +91,7 @@ public class VoyageController {
         List<EntityModel<Voyage>> models = voyages.stream()
                 .map(v -> EntityModel.of(v,
                         linkTo(methodOn(VoyageController.class).getAll(null, null, null, null, null)).withSelfRel(),
+                        linkTo(methodOn(VoyageController.class).getVoyageDetails(v.getId())).withRel("details"),
                         linkTo(methodOn(VoyageController.class).cancel(v.getId(), null)).withRel("annuler")
                 ))
                 .toList();
@@ -108,6 +111,13 @@ public class VoyageController {
     public ResponseEntity<?> getVoyageDetails(@PathVariable Integer idVoyage) {
         VoyageWithDetailsDTO voyage = voyageService.getVoyageWithDetails(idVoyage);
 
-        return ResponseEntity.ok(voyage);
+        EntityModel<?> model = EntityModel.of(voyage,
+                linkTo(methodOn(VoyageController.class).getVoyageDetails(idVoyage)).withSelfRel(),
+                linkTo(methodOn(VoyageController.class).getAll(null, null, null, null, null)).withRel("voyages"),
+                linkTo(methodOn(VoyageController.class).update(idVoyage, null, null)).withRel("editer"),
+                linkTo(methodOn(VoyageController.class).cancel(idVoyage, null)).withRel("annuler")
+        );
+
+        return ResponseEntity.ok(model);
     }
 }

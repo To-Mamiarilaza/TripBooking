@@ -38,6 +38,7 @@ public class StatisticController {
         List<RevenueByMonth> revenues = statisticService.getRevenueByMonth(year);
         
         CollectionModel<RevenueByMonth> model = CollectionModel.of(revenues,
+                linkTo(methodOn(StatisticController.class).getRevenueByMonth(year, null)).withSelfRel(),
                 linkTo(methodOn(VoyageController.class).getAll(null, null, null, null, null)).withRel("voyages")
         );
         
@@ -60,6 +61,8 @@ public class StatisticController {
         List<RevenueByRoute> routes = statisticService.getRevenueByRoute(year, month);
         
         CollectionModel<RevenueByRoute> model = CollectionModel.of(routes,
+                linkTo(methodOn(StatisticController.class).getRevenueByRoute(year, month, null)).withSelfRel(),
+                linkTo(methodOn(StatisticController.class).getRevenueByMonth(year, null)).withRel("revenus-annuels"),
                 linkTo(methodOn(VoyageController.class).getAll(null, null, null, null, null)).withRel("voyages")
         );
         
